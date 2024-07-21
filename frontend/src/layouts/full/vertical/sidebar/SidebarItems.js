@@ -16,17 +16,25 @@ const SidebarItems = () => {
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
   const hideMenu = lgUp ? customizer.isCollapse && !customizer.isSidebarHover : '';
   const dispatch = useDispatch();
+  
+  // Get the user type from the Redux store
+  const userType = useSelector((state) => state.auth.user?.type);
+
+  // Filter menu items based on user type
+  const filteredMenuItems = Menuitems.filter(item => {
+    // If userType is not specified, show the item to everyone
+    if (!item.userType) return true;
+    
+    // If userType is specified, check if it matches the current user's type
+    return item.userType === userType;
+  });
 
   return (
     <Box sx={{ px: 3 }}>
       <List sx={{ pt: 0 }} className="sidebarNav">
-        {Menuitems.map((item, index) => {
-          // {/********SubHeader**********/}
+        {filteredMenuItems.map((item) => {
           if (item.subheader) {
             return <NavGroup item={item} hideMenu={hideMenu} key={item.subheader} />;
-
-            // {/********If Sub Menu**********/}
-            /* eslint no-else-return: "off" */
           } else if (item.children) {
             return (
               <NavCollapse
@@ -39,8 +47,6 @@ const SidebarItems = () => {
                 onClick={() => dispatch(toggleMobileSidebar())}
               />
             );
-
-            // {/********If Sub No Menu**********/}
           } else {
             return (
               <NavItem
@@ -57,4 +63,5 @@ const SidebarItems = () => {
     </Box>
   );
 };
+
 export default SidebarItems;

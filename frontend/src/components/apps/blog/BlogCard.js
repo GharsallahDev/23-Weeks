@@ -60,9 +60,9 @@ const BlogCard = ({ post }) => {
             <CardMedia component="img" height="240" image={coverImg} alt="green iguana" />
           </Typography>
           <CardContent>
-            <Stack direction="row" sx={{ marginTop: '-45px' }}>
+            <Stack direction="row" sx={{ marginTop: '-35px' }}>
               <Tooltip title={author.name} placement="top">
-                <Avatar aria-label="recipe" src={author.avatar}></Avatar>
+                {/* <Avatar aria-label="recipe" src={author.avatar}></Avatar> */}
               </Tooltip>
               <Chip
                 sx={{ marginLeft: 'auto', marginTop: '-21px', backgroundColor: 'white' }}

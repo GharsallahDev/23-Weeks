@@ -1,6 +1,7 @@
 import React, { lazy } from 'react';
-import { Navigate } from 'react-router-dom';
-
+import { Navigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated, selectUserType } from '../store/auth/AuthSlice';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 
 /* ***Layouts**** */
@@ -8,9 +9,11 @@ const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
 
 /* ****Pages***** */
-const ModernDash = Loadable(lazy(() => import('../views/dashboard/Modern')));
-const EcommerceDash = Loadable(lazy(() => import('../views/dashboard/Ecommerce')));
+const DoctorDash = Loadable(lazy(() => import('../views/dashboard/Doctor')));
+const WomanDash = Loadable(lazy(() => import('../views/dashboard/Woman')));
 
+const Test1 = Loadable(lazy(() => import('../views/dashboard/test1')));
+const Test2 = Loadable(lazy(() => import('../views/dashboard/test2')));
 /* ****Apps***** */
 const Chats = Loadable(lazy(() => import('../views/apps/chat/Chat')));
 const Notes = Loadable(lazy(() => import('../views/apps/notes/Notes')));
@@ -113,14 +116,105 @@ const Maintenance = Loadable(lazy(() => import('../views/authentication/Maintena
 // landingpage
 const Landingpage = Loadable(lazy(() => import('../views/pages/landingpage/Landingpage')));
 
+const UltrasoundClassification = Loadable(lazy(() => import('../views/ultrasound/EntityClassification')));
+const HeadCircumference = Loadable(lazy(() => import('../views/ultrasound/HeadCircumference')));
+
+const BabyNameGenerator = Loadable(lazy(() => import('../views/generator/BabyNameGenerator')));
+
+const ChatBot = Loadable(lazy(() => import('../views/generator/Bot')));
+
+const ProtectedRoute = ({ children, allowedTypes }) => {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const userType = useSelector(selectUserType);
+  const location = useLocation();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/auth/login" state={{ from: location }} replace />;
+  }
+
+  if (allowedTypes && !allowedTypes.includes(userType)) {
+    const dashboardRoute = userType === 'doctor' ? '/dashboards/doctor' : '/dashboards/woman';
+    return <Navigate to={dashboardRoute} replace />;
+  }
+
+  return children;
+};
+
+const PublicOnlyRoute = ({ children }) => {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const userType = useSelector(selectUserType);
+  const location = useLocation();
+
+  if (isAuthenticated) {
+    const dashboardRoute = userType === 'doctor' ? '/dashboards/doctor' : '/dashboards/woman';
+    return <Navigate to={dashboardRoute} state={{ from: location }} replace />;
+  }
+
+  return children;
+};
+
 const Router = [
   {
     path: '/',
     element: <FullLayout />,
     children: [
       { path: '/', element: <Navigate to="/landingpage" /> },
-      { path: '/dashboards/modern', exact: true, element: <ModernDash /> },
-      { path: '/dashboards/ecommerce', exact: true, element: <EcommerceDash /> },
+      {
+        path: '/dashboards/doctor',
+        element: (
+          <ProtectedRoute allowedTypes={['doctor']}>
+            {' '}
+            <DoctorDash />{' '}
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/dashboards/woman',
+        element: (
+          <ProtectedRoute allowedTypes={['user']}>
+            {' '}
+            <WomanDash />{' '}
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/ultrasound/entity_classification',
+        element: (
+          <ProtectedRoute allowedTypes={['doctor']}>
+            {' '}
+            <UltrasoundClassification />{' '}
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/ultrasound/head_circumference',
+        element: (
+          <ProtectedRoute allowedTypes={['doctor']}>
+            {' '}
+            <HeadCircumference />{' '}
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/generator/names',
+        element: (
+          <ProtectedRoute allowedTypes={['user']}>
+            {' '}
+            <BabyNameGenerator />{' '}
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/generator/chat',
+        element: (
+          <ProtectedRoute allowedTypes={['user']}>
+            {' '}
+            <ChatBot />{' '}
+          </ProtectedRoute>
+        ),
+      },
+      { path: '/test1', element: <Test1 /> },
+      { path: '/test2', element: <Test2 /> },
       { path: '/apps/chats', element: <Chats /> },
       { path: '/apps/notes', element: <Notes /> },
       { path: '/apps/calendar', element: <Calendar /> },
@@ -194,9 +288,25 @@ const Router = [
     element: <BlankLayout />,
     children: [
       { path: '/auth/404', element: <Error /> },
-      { path: '/auth/login', element: <Login /> },
+      {
+        path: '/auth/login',
+        element: (
+          <PublicOnlyRoute>
+            {' '}
+            <Login />{' '}
+          </PublicOnlyRoute>
+        ),
+      },
       { path: '/auth/login2', element: <Login2 /> },
-      { path: '/auth/register', element: <Register /> },
+      {
+        path: '/auth/register',
+        element: (
+          <PublicOnlyRoute>
+            {' '}
+            <Register />{' '}
+          </PublicOnlyRoute>
+        ),
+      },
       { path: '/auth/register2', element: <Register2 /> },
       { path: '/auth/forgot-password', element: <ForgotPassword /> },
       { path: '/auth/forgot-password2', element: <ForgotPassword2 /> },

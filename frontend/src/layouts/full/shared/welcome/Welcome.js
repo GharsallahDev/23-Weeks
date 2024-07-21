@@ -37,8 +37,8 @@ const Welcome = () => {
           variant="filled"
           sx={{ width: '100%', color: 'white' }}
         >
-          <AlertTitle>Welcome To 23 Weeks</AlertTitle>
-          A2SV
+          <AlertTitle>A2CV</AlertTitle>
+          Welcom to 23 Weeks !
         </Alert>
       </Snackbar>
     </React.Fragment>

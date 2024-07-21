@@ -2,36 +2,47 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.models.user import User
 from app import db
+from app.schemas.user_schema import user_schema
+from marshmallow import ValidationError
 
 bp = Blueprint('auth', __name__)
 
 @bp.route('/register', methods=['POST'])
 def register():
-    data = request.get_json()
-    if User.query.filter_by(username=data['username']).first():
-        return jsonify({"msg": "Username already exists"}), 400
-    if User.query.filter_by(email=data['email']).first():
+    try:
+        data = user_schema.load(request.json)
+    except ValidationError as err:
+        return jsonify(err.messages), 400
+
+    full_name = data['full_name'].lower()
+    email = data['email'].lower()
+
+    if User.query.filter_by(email=email).first():
         return jsonify({"msg": "Email already exists"}), 400
-    
-    user = User(username=data['username'], email=data['email'])
+
+    user = User(full_name=full_name, email=email, type=data['type'])
     user.set_password(data['password'])
     db.session.add(user)
     db.session.commit()
     
-    return jsonify({"msg": "User created successfully"}), 201
+    access_token = create_access_token(identity=user.id)
+    return jsonify(access_token=access_token, user_type=user.type), 201
 
 @bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    user = User.query.filter_by(username=data['username']).first()
+    
+    email = data['email'].lower()
+    
+    user = User.query.filter_by(email=email).first()
     if user and user.check_password(data['password']):
         access_token = create_access_token(identity=user.id)
-        return jsonify(access_token=access_token), 200
-    return jsonify({"msg": "Bad username or password"}), 401
+        return jsonify(access_token=access_token, user_type=user.type), 200
+    return jsonify({"msg": "Bad email or password"}), 401
 
-@bp.route('/protected', methods=['GET'])
+@bp.route('/user', methods=['GET'])
 @jwt_required()
-def protected():
+def get_user():
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
-    return jsonify(logged_in_as=user.username), 200
+    return jsonify(user_schema.dump(user)), 200

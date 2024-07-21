@@ -8,19 +8,21 @@ import ContactsReducer from './apps/contacts/ContactSlice';
 import EcommerceReducer from './apps/eCommerce/EcommerceSlice';
 import UserProfileReducer from './apps/userProfile/UserProfileSlice';
 import BlogReducer from './apps/blog/BlogSlice';
+import AuthReducer from './auth/AuthSlice';
 
 export const store = configureStore({
-  reducer: {
-    customizer: CustomizerReducer,
-    chatReducer: ChatsReducer,
-    emailReducer: EmailReducer,
-    notesReducer: NotesReducer,
-    contactsReducer: ContactsReducer,
-    ticketReducer: TicketReducer,
-    ecommerceReducer: EcommerceReducer,
-    userpostsReducer: UserProfileReducer,
-    blogReducer: BlogReducer,
-  },
+    reducer: {
+        customizer: CustomizerReducer,
+        chatReducer: ChatsReducer,
+        emailReducer: EmailReducer,
+        notesReducer: NotesReducer,
+        contactsReducer: ContactsReducer,
+        ticketReducer: TicketReducer,
+        ecommerceReducer: EcommerceReducer,
+        userpostsReducer: UserProfileReducer,
+        blogReducer: BlogReducer,
+        auth: AuthReducer,
+    },
 });
 
 export default store;

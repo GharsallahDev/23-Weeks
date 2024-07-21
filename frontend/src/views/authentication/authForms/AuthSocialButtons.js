@@ -38,7 +38,7 @@ const AuthSocialButtons = ({ title }) => (
         <Box sx={{ display: { xs: 'none', sm: 'flex' }, whiteSpace: 'nowrap', mr: { sm: '3px' } }}>
           {title}{' '}
         </Box>{' '}
-        FB
+        Facebook
       </CustomSocialButton>
     </Stack>
   </>

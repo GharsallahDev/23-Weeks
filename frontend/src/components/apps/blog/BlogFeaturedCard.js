@@ -105,7 +105,7 @@ const BlogFeaturedCard = ({ post, index }) => {
                   <Box>
                     <Stack direction="row">
                       <Tooltip title={author.name} placement="top">
-                        <Avatar aria-label="recipe" src={author.avatar}></Avatar>
+                        {/* <Avatar aria-label="recipe" src={author.avatar}></Avatar> */}
                       </Tooltip>
                       <Chip
                         sx={{ marginLeft: 'auto' }}

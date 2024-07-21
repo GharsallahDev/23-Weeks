@@ -1,8 +1,8 @@
-from flask import Flask
+from flask import Flask, Response, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 from .config import Config
 
 db = SQLAlchemy()
@@ -13,7 +13,15 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    CORS(app)
+    # Set up CORS
+    CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "http://192.168.1.104:3000"]}})
+
+    # Handle OPTIONS request
+    @app.before_request
+    def preflight():
+        if request.method.lower() == 'options':
+            return Response()
+
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)

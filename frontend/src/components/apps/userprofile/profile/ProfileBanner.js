@@ -24,8 +24,10 @@ import {
 } from '@tabler/icons';
 import ProfileTab from './ProfileTab';
 import BlankCard from '../../../shared/BlankCard';
+import { useSelector } from 'react-redux';
 
 const ProfileBanner = () => {
+    const user = useSelector((state) => state.auth.user);
   const ProfileImage = styled(Box)(() => ({
     backgroundImage: 'linear-gradient(#50b2fc,#f44c66)',
     borderRadius: '50%',
@@ -37,7 +39,7 @@ const ProfileBanner = () => {
     margin: '0 auto',
   }));
   const [isLoading, setLoading] = React.useState(true);
-
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
@@ -145,10 +147,10 @@ const ProfileBanner = () => {
                 </ProfileImage>
                 <Box mt={1}>
                   <Typography fontWeight={600} variant="h5">
-                    Mathew Anderson
+                    {user ? user.full_name : 'Full Name'}
                   </Typography>
                   <Typography color="textSecondary" variant="h6" fontWeight={400}>
-                    Designer
+                    {user ? user.type.charAt(0).toUpperCase() + user.type.slice(1) : 'Type'}
                   </Typography>
                 </Box>
               </Box>

@@ -1,6 +1,8 @@
 import React from 'react';
-import { styled, Select } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import Select from '@mui/material/Select';
 
-const CustomSelect = styled((props) => <Select {...props} />)();
+const CustomSelect = styled((props) => < Select {...props }
+        />)({});
 
-export default CustomSelect;
+        export default CustomSelect;
