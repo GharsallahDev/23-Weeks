@@ -7,8 +7,8 @@ Welcome to the 23 Weeks GitHub repository! 23 Weeks is an AI-powered platform de
 This repository is structured as follows:
 
 - **`backend/`**: This directory contains the backend code of the 23 Weeks platform, including the API endpoints, database models, and business logic implemented in Python using the Flask framework.
-- **`frontend/`**: Here, you will find the frontend code for the 23 Weeks platform, implemented using JavaScript and Flutter.
-- **`mobile/`**: This directory contains the source code for the mobile applications, implemented using Flutter for cross-platform development on both iOS and Android.
+- **`frontend/`**: Here, you will find the frontend code for the 23 Weeks platform, implemented using the react framework.
+- **`mobile/`**: This directory contains the source code for the mobile applications, implemented using Dart for cross-platform development on both iOS and Android.
 - **`notebooks/`**: Here, you will find the notebooks related to the project
 - **`models/`**: This directory contains the trained AI/ML models used by 23 Weeks for ultrasound image enhancement, anomaly detection, and other AI-driven features. The models are implemented using Python-based AI/ML libraries such as TensorFlow and OpenCV.
 - **`datasets/`**: This directory includes sample datasets used for training and testing the AI models, such as ultrasound images and health metrics.
