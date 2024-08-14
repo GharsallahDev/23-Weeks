@@ -10,13 +10,11 @@ migrate = Migrate()
 jwt = JWTManager()
 
 def create_app(config_class=Config):
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='../static')
     app.config.from_object(config_class)
 
-    # Set up CORS
-    CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "http://192.168.1.104:3000"]}})
+    CORS(app, resources={r"/*": {"origins": ["http://localhost:3000"]}})
 
-    # Handle OPTIONS request
     @app.before_request
     def preflight():
         if request.method.lower() == 'options':

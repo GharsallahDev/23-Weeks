@@ -37,7 +37,7 @@ def login():
     user = User.query.filter_by(email=email).first()
     if user and user.check_password(data['password']):
         access_token = create_access_token(identity=user.id)
-        return jsonify(access_token=access_token, user_type=user.type), 200
+        return jsonify(access_token=access_token, type=user.type, full_name=user.full_name), 200
     return jsonify({"msg": "Bad email or password"}), 401
 
 @bp.route('/user', methods=['GET'])
