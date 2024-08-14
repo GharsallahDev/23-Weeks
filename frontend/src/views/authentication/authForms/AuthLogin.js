@@ -55,7 +55,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
           const data = await response.json();
           dispatch(
             setCredentials({
-              user: { type: data.user_type, email: values.email, full_name: data.full_name },
+              user: { type: data.type, email: values.email, full_name: data.full_name },
               token: data.access_token,
             }),
           );

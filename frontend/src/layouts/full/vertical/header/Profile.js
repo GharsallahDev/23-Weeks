@@ -1,25 +1,32 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Box, Menu, Avatar, Typography, Divider, Button, IconButton } from '@mui/material';
-import * as dropdownData from './data';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import { Box, Menu, Avatar, Typography, Divider, Button, IconButton, Stack } from '@mui/material';
 import { IconMail } from '@tabler/icons';
-import { Stack } from '@mui/system';
-
+import * as dropdownData from './data';
 import ProfileImg from 'src/assets/images/profile/user-1.jpg';
 import ProfileImg2 from 'src/assets/images/profile/user-10.jpg';
 import unlimitedImg from 'src/assets/images/backgrounds/unlimited-bg.png';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import { useSelector } from 'react-redux';
+import { logout } from 'src/store/auth/AuthSlice';
 
 const Profile = () => {
   const user = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [anchorEl2, setAnchorEl2] = useState(null);
+
   const handleClick2 = (event) => {
     setAnchorEl2(event.currentTarget);
   };
+
   const handleClose2 = () => {
     setAnchorEl2(null);
+  };
+
+  const handleLogout = () => {
+    dispatch(logout()); // Clear user data from Redux store
+    navigate('/auth/login'); // Redirect to login page
   };
 
   return (
@@ -46,9 +53,6 @@ const Profile = () => {
           }}
         />
       </IconButton>
-      {/* ------------------------------------------- */}
-      {/* Message Dropdown */}
-      {/* ------------------------------------------- */}
       <Menu
         id="msgs-menu"
         anchorEl={anchorEl2}
@@ -156,16 +160,10 @@ const Profile = () => {
                       Upgrade
                     </Button>
                   </Box>
-                  <img src={unlimitedImg} alt="unlimited" className="signup-bg"></img>
+                  <img src={unlimitedImg} alt="unlimited" className="signup-bg" />
                 </Box>
               </Box>
-              <Button
-                to="/auth/login"
-                variant="outlined"
-                color="primary"
-                component={Link}
-                fullWidth
-              >
+              <Button variant="outlined" color="primary" fullWidth onClick={handleLogout}>
                 Logout
               </Button>
             </Box>

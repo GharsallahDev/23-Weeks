@@ -93,7 +93,7 @@ const UltrasoundClassification = () => {
     formData.append('image', image);
 
     try {
-      const response = await fetch('/api/classify-ultrasound', {
+      const response = await fetch('http://127.0.0.1:5000/api/classify-ultrasound', {
         method: 'POST',
         body: formData,
       });
@@ -117,6 +117,68 @@ const UltrasoundClassification = () => {
     setResults(null);
     setError(null);
   };
+
+  const renderClassificationResults = (classification, title) => (
+    <Box sx={{ mt: 2 }}>
+      <Typography variant="h6" gutterBottom>
+        {title}
+      </Typography>
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="subtitle1" color="text.secondary">
+          Main Class
+        </Typography>
+        <Typography variant="h5" color="primary" fontWeight="bold">
+          {classification.mainClass}
+        </Typography>
+      </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <Typography variant="body1" fontWeight="medium" sx={{ mr: 1 }}>
+          Accuracy:
+        </Typography>
+        <Typography variant="body1">{`${(classification.accuracy * 100).toFixed(2)}%`}</Typography>
+        <Box sx={{ ml: 2, flexGrow: 1 }}>
+          <LinearProgress
+            variant="determinate"
+            value={classification.accuracy * 100}
+            color={
+              classification.accuracy > 0.7
+                ? 'success'
+                : classification.accuracy > 0.5
+                ? 'warning'
+                : 'error'
+            }
+          />
+        </Box>
+      </Box>
+      <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+        All Classes:
+      </Typography>
+      <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+        {classification.allClasses.map((cls) => (
+          <ListItem key={cls.name} disablePadding>
+            <ListItemIcon>
+              {cls.name === classification.mainClass ? (
+                <CheckCircleIcon color="success" />
+              ) : (
+                <CancelIcon color="error" />
+              )}
+            </ListItemIcon>
+            <ListItemText
+              primary={
+                <Typography
+                  variant="body1"
+                  fontWeight={cls.name === classification.mainClass ? 'bold' : 'regular'}
+                >
+                  {cls.name}
+                </Typography>
+              }
+              secondary={`Probability: ${(cls.probability * 100).toFixed(2)}%`}
+            />
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
 
   return (
     <PageContainer title="Ultrasound Classification">
@@ -205,72 +267,14 @@ const UltrasoundClassification = () => {
                 </Alert>
               )}
               {results && (
-                <Box sx={{ mt: 2 }}>
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="subtitle1" color="text.secondary">
-                      Main Class
-                    </Typography>
-                    <Typography variant="h5" color="primary" fontWeight="bold">
-                      {results.mainClass}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="subtitle1" color="text.secondary">
-                      Sub Class
-                    </Typography>
-                    <Typography variant="h6" color="secondary">
-                      {results.subClass}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="body1" fontWeight="medium" sx={{ mr: 1 }}>
-                      Accuracy:
-                    </Typography>
-                    <Typography variant="body1">
-                      {`${Math.round(results.accuracy * 100)}%`}
-                    </Typography>
-                    <Box sx={{ ml: 2, flexGrow: 1 }}>
-                      <LinearProgress
-                        variant="determinate"
-                        value={results.accuracy * 100}
-                        color={
-                          results.accuracy > 0.7
-                            ? 'success'
-                            : results.accuracy > 0.5
-                            ? 'warning'
-                            : 'error'
-                        }
-                      />
-                    </Box>
-                  </Box>
-                  <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
-                    All Classes:
-                  </Typography>
-                  <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-                    {results.allClasses.map((cls) => (
-                      <ListItem key={cls.name} disablePadding>
-                        <ListItemIcon>
-                          {cls.name === results.mainClass ? (
-                            <CheckCircleIcon color="success" />
-                          ) : (
-                            <CancelIcon color="error" />
-                          )}
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={
-                            <Typography
-                              variant="body1"
-                              fontWeight={cls.name === results.mainClass ? 'bold' : 'regular'}
-                            >
-                              {cls.name}
-                            </Typography>
-                          }
-                          secondary={`Probability: ${(cls.probability * 100).toFixed(2)}%`}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Box>
+                <>
+                  {renderClassificationResults(results.mainClassification, 'Main Classification')}
+                  {results.brainClassification &&
+                    renderClassificationResults(
+                      results.brainClassification,
+                      'Brain Classification',
+                    )}
+                </>
               )}
             </FixedHeightCardContent>
             <CardActions>

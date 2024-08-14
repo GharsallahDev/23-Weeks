@@ -118,6 +118,7 @@ const Landingpage = Loadable(lazy(() => import('../views/pages/landingpage/Landi
 
 const UltrasoundClassification = Loadable(lazy(() => import('../views/ultrasound/EntityClassification')));
 const HeadCircumference = Loadable(lazy(() => import('../views/ultrasound/HeadCircumference')));
+const ReportGeneration = Loadable(lazy(() => import('../views/ultrasound/ReportGeneration')));
 
 const BabyNameGenerator = Loadable(lazy(() => import('../views/generator/BabyNameGenerator')));
 
@@ -192,6 +193,15 @@ const Router = [
           <ProtectedRoute allowedTypes={['doctor']}>
             {' '}
             <HeadCircumference />{' '}
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/ultrasound/report_generation',
+        element: (
+          <ProtectedRoute allowedTypes={['doctor']}>
+            {' '}
+            <ReportGeneration />{' '}
           </ProtectedRoute>
         ),
       },
