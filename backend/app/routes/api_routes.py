@@ -110,13 +110,6 @@ def calculate_circumference_route():
         print(f"Error during processing: {str(e)}")
         traceback.print_exc()
         return jsonify({"error": "Internal server error"}), 500
-    except Exception as e:
-        print(f"Error during processing: {str(e)}")
-        traceback.print_exc()
-        return jsonify({"error": "Internal server error"}), 500
-
-
-
 
 @bp.route('/classify-ultrasound', methods=['POST'])
 def classify():
