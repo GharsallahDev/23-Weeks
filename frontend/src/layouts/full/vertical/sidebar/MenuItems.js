@@ -50,6 +50,7 @@ import {
   IconLockAccess,
   IconWoman,
   IconBuildingHospital,
+  IconAlarm,
 } from '@tabler/icons';
 
 import { uniqueId } from 'lodash';
@@ -101,6 +102,12 @@ const Menuitems = [
       },
       {
         id: uniqueId(),
+        title: 'Enhance Quality',
+        icon: IconPoint,
+        href: '/ultrasound/Enhancement',
+      },
+      {
+        id: uniqueId(),
         title: 'Report Generation',
         icon: IconPoint,
         href: '/ultrasound/report_generation',
@@ -127,6 +134,13 @@ const Menuitems = [
         href: '/generator/names',
       },
     ],
+  },
+  {
+    id: uniqueId(),
+    title: 'Reminders',
+    icon: IconAlarm,
+    href: '/apps/reminders',
+    userType: 'user',
   },
   {
     navlabel: true,

@@ -21,7 +21,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import PageContainer from '../../components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
-import breadcrumbImg from 'src/assets/images/breadcrumb/scan.png';
+import breadcrumbImg from 'src/assets/images/breadcrumb/ultrasound.png';
 
 const BCrumb = [
   {

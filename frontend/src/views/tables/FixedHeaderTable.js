@@ -1,9 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Typography,
   Box,
-  Avatar,
-  LinearProgress,
   IconButton,
   Table,
   TableBody,
@@ -12,94 +10,138 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Stack,
+  Alert,
+  AlertTitle
 } from '@mui/material';
-
+import { IconTrash, IconEdit, IconMicrophone } from '@tabler/icons';
 import Breadcrumb from '../../layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '../../components/container/PageContainer';
-
-import img1 from '../../assets/images/products/s1.jpg';
-import img2 from '../../assets/images/products/s2.jpg';
-import img3 from '../../assets/images/products/s3.jpg';
-import img4 from '../../assets/images/products/s4.jpg';
 import ParentCard from '../../components/shared/ParentCard';
-import { IconTrash } from '@tabler/icons';
-import { Stack } from '@mui/system';
 
 const columns = [
-  { id: 'pname', label: 'Products', minWidth: 170 },
-  { id: 'review', label: 'Review', minWidth: 100 },
-  {
-    id: 'earnings',
-    label: 'Earnings',
-    minWidth: 170,
-  },
-  {
-    id: 'action',
-    label: 'Action',
-    minWidth: 170,
-  },
-];
-
-const rows = [
-  {
-    id: 1,
-    imgsrc: img1,
-    name: 'Is it good butterscotch ice-cream?',
-    tags: 'Ice-Cream, Milk, Powder',
-    review: 'good',
-    percent: 65,
-    earnings: '546,000',
-  },
-  {
-    id: 2,
-    imgsrc: img2,
-    name: 'Supreme fresh tomato available',
-    tags: 'Market, Mall',
-    review: 'excellent',
-    percent: 98,
-    earnings: '780,000',
-  },
-  {
-    id: 3,
-    imgsrc: img3,
-    name: 'Red color candy from Gucci',
-    tags: 'Chocolate, Yummy',
-    review: 'average',
-    percent: 46,
-    earnings: '457,000',
-  },
-  {
-    id: 4,
-    imgsrc: img4,
-    name: 'Stylish night lamp for night',
-    tags: 'Elecric, Wire, Current',
-    review: 'poor',
-    percent: 23,
-    earnings: '125,000',
-  },
+  { id: 'event', label: 'Event', minWidth: 150 },
+  { id: 'date', label: 'Date', minWidth: 100 },
+  { id: 'time', label: 'Time', minWidth: 100 },
+  { id: 'day', label: 'Day', minWidth: 100 },
+  { id: 'occurrence', label: 'Occurrence', minWidth: 150 },
+  { id: 'action', label: 'Action', minWidth: 170 },
 ];
 
 const BCrumb = [
-  {
-    to: '/',
-    title: 'Home',
-  },
-  {
-    title: 'Fixed Header Table',
-  },
+  { to: '/', title: 'Home' },
+  { title: 'Pregnancy Reminders' },
 ];
 
-const FixedHeaderTable = () => {
-  const Capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+const PregnancyRemindersTable = () => {
+  const [recording, setRecording] = useState(false);
+  const [data, setData] = useState([]);
+  const [result, setResult] = useState('');
+  const [alert, setAlert] = useState('');
+
+  const handleRecord = () => {
+    if (recording) {
+      setRecording(false);
+      return;
+    }
+    setRecording(true);
+    startRecording();
+  };
+
+  const startRecording = () => {
+    let mediaRecorder;
+    let audioChunks = [];
+
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+
+        mediaRecorder.ondataavailable = event => {
+          audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+          audioChunks = [];
+          sendAudioToServer(audioBlob);
+        };
+
+        // Stop recording after 5 seconds
+        setTimeout(() => {
+          mediaRecorder.stop();
+        }, 5000);
+      })
+      .catch(error => {
+        console.error('Error accessing microphone:', error);
+        setResult(`Error: ${error.message}`);
+        setRecording(false); // Stop recording if there's an error
+      });
+  };
+
+  const sendAudioToServer = (audioBlob) => {
+    const formData = new FormData();
+    formData.append('audio_data', audioBlob);
+
+    fetch('http://127.0.0.1:5000/api/speech-to-text', {
+      method: 'POST',
+      body: formData,
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data && data.extracted_data && data.extracted_data.events) {
+        setData(prevData => [...prevData, ...data.extracted_data.events]); // Append new reminders
+        setResult('');
+        setAlert('Reminder set with success!'); // Set success alert
+      } else {
+        setResult('Error: No events data returned from the server.');
+        console.log('Response Data:', data);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      setResult(`Error: ${error.message}`);
+    });
+  };
+
+  const formatTime = (time) => {
+    if (!time) return '';
+    
+    let [hour, minute] = time.split(':');
+    let ampm = 'AM';
+    
+    if (parseInt(hour, 10) >= 12) {
+      ampm = 'PM';
+      if (parseInt(hour, 10) > 12) {
+        hour -= 12;
+      }
+    } else if (hour === '0') {
+      hour = 12; // Midnight case
+    }
+    
+    return `${hour}`;
+  };
+
+  const getDayOfWeek = (dateString) => {
+    if (!dateString) return '';
+    
+    const [day, month, year] = dateString.split('/').map(part => parseInt(part, 10));
+    const date = new Date(year, month - 1, day);
+    const options = { weekday: 'long' };
+    return date.toLocaleDateString('en-US', options);
+  };
 
   return (
-    <PageContainer title="Fixed Header Table" description="this is Fixed Header Table page">
-      {/* breadcrumb */}
-      <Breadcrumb title="Fixed Header Table" items={BCrumb} />
-      {/* end breadcrumb */}
-      <ParentCard title="Fixed Header Table">
+    <PageContainer title="Pregnancy Reminders" description="Manage your pregnancy reminders">
+      <Breadcrumb title="Pregnancy Reminders" items={BCrumb} />
+      <ParentCard title="Pregnancy Reminders">
         <Paper variant="outlined">
-          <TableContainer sx={{ overflow: 'auto', width: { xs: '280px', sm: 'auto' }, maxHeight: 440, }}>
+          <TableContainer sx={{ overflow: 'auto', width: { xs: '280px', sm: 'auto' }, maxHeight: 440 }}>
             <Table stickyHeader aria-label="sticky table">
               <TableHead>
                 <TableRow>
@@ -117,71 +159,59 @@ const FixedHeaderTable = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((row) => {
-                  return (
-                    <TableRow hover key={row.id}>
-                      <TableCell>
-                        <Stack spacing={2} direction="row" alignItems="center">
-                          <Avatar
-                            src={row.imgsrc}
-                            alt={row.imgsrc}
-                            sx={{
-                              borderRadius: '10px',
-                              height: '70px',
-                              width: '90px',
-                            }}
-                          />
-                          <Box>
-                            <Typography variant="h5">{row.name}</Typography>
-                            <Typography color="textSecondary" variant="h6" mt={1} fontWeight="400">
-                              {row.tags}
-                            </Typography>
-                          </Box>
-                        </Stack>
-                      </TableCell>
-                      <TableCell>
-                        <Stack spacing={1}>
-                          <Typography
-                            variant="h6">
-                            {Capitalize(row.review)}
-                          </Typography>
-                          <LinearProgress
-                            value={row.percent}
-                            variant="determinate" color={row.review === 'good' ? 'primary' : row.review === 'excellent' ? 'success' : row.review === 'average' ? 'warning' : row.review === 'poor' ? 'error' : 'secondary'}
-                          />
-                          <Typography
-                            color="textSecondary"
-                            variant="h6"
-                            fontWeight="400" whiteSpace="nowrap">
-                            {row.percent}% sold
-                          </Typography>
-                        </Stack>
-
-                      </TableCell>
-                      <TableCell>
-                        <Stack spacing={1}>
-                          <Typography color="textSecondary" variant="h6">
-                            Earnings
-                          </Typography>
-                          <Typography variant="h5">${row.earnings}</Typography>
-                        </Stack>
-                      </TableCell>
-                      <TableCell>
+                {data.map((row, index) => (
+                  <TableRow hover key={index}>
+                    <TableCell>
+                      <Typography variant="h6">{row.description}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="h6">{row.date}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="h6">{row.time ? formatTime(row.time) : ''}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="h6">{row.date ? getDayOfWeek(row.date) : ''}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="h6">{row.recurrence}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Stack spacing={1} direction="row" alignItems="center">
+                        <IconButton>
+                          <IconEdit width={18} />
+                        </IconButton>
                         <IconButton>
                           <IconTrash width={18} />
                         </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
+          <Box mt={2} display="flex" flexDirection="column" alignItems="center">
+            <IconButton onClick={handleRecord} color={recording ? 'error' : 'primary'}>
+              <IconMicrophone width={24} />
+            </IconButton>
+            <Typography variant="h6" mt={2}>
+              {recording ? 'Recording...' : 'Record Voice'}
+            </Typography>
+            <Box mt={2}>
+              {alert && (
+                <Alert severity="success">
+                  <AlertTitle>Success</AlertTitle>
+                  {alert}
+                </Alert>
+              )}
+              <Typography variant="h6">{result}</Typography>
+            </Box>
+          </Box>
         </Paper>
-
       </ParentCard>
     </PageContainer>
   );
 };
 
-export default FixedHeaderTable;
+export default PregnancyRemindersTable;

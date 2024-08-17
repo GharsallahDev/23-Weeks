@@ -22,6 +22,7 @@ const Email = Loadable(lazy(() => import('../views/apps/email/Email')));
 const Blog = Loadable(lazy(() => import('../views/apps/blog/Blog')));
 const BlogDetail = Loadable(lazy(() => import('../views/apps/blog/BlogPost')));
 const Tickets = Loadable(lazy(() => import('../views/apps/tickets/Tickets')));
+const SmartReminders = Loadable (lazy(() => import('../views/tables/FixedHeaderTable')));
 const Contacts = Loadable(lazy(() => import('../views/apps/contacts/Contacts')));
 const Ecommerce = Loadable(lazy(() => import('../views/apps/eCommerce/Ecommerce')));
 const EcommerceDetail = Loadable(lazy(() => import('../views/apps/eCommerce/EcommerceDetail')));
@@ -117,6 +118,7 @@ const Maintenance = Loadable(lazy(() => import('../views/authentication/Maintena
 const Landingpage = Loadable(lazy(() => import('../views/pages/landingpage/Landingpage')));
 
 const UltrasoundClassification = Loadable(lazy(() => import('../views/ultrasound/EntityClassification')));
+const UltrasoundEnhancement = Loadable (lazy(() => import('../views/ultrasound/ImageEnhancement')));
 const HeadCircumference = Loadable(lazy(() => import('../views/ultrasound/HeadCircumference')));
 const ReportGeneration = Loadable(lazy(() => import('../views/ultrasound/ReportGeneration')));
 
@@ -188,6 +190,15 @@ const Router = [
         ),
       },
       {
+        path: '/ultrasound/Enhancement',
+        element: (
+          <ProtectedRoute allowedTypes={['doctor']}>
+            {' '}
+            <UltrasoundEnhancement />{' '}
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: '/ultrasound/head_circumference',
         element: (
           <ProtectedRoute allowedTypes={['doctor']}>
@@ -211,6 +222,15 @@ const Router = [
           <ProtectedRoute allowedTypes={['user']}>
             {' '}
             <BabyNameGenerator />{' '}
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/apps/reminders',
+        element: (
+          <ProtectedRoute allowedTypes={['user']}>
+            {' '}
+            <SmartReminders />{' '}
           </ProtectedRoute>
         ),
       },
