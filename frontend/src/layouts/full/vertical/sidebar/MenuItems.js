@@ -129,6 +129,12 @@ const Menuitems = [
       },
       {
         id: uniqueId(),
+        title: 'Story Generation',
+        icon: IconPoint,
+        href: '/generator/story-generator',
+      },
+      {
+        id: uniqueId(),
         title: 'Baby Names',
         icon: IconPoint,
         href: '/generator/names',
