@@ -43,7 +43,6 @@ const FixedHeightCardContent = styled(CardContent)({
 
 const ImageContainer = styled(Box)({
   display: 'flex',
-  flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
   minHeight: 300,
@@ -52,25 +51,29 @@ const ImageContainer = styled(Box)({
   padding: 16,
   marginBottom: 16,
   backgroundColor: '#f9f9f9',
-  position: 'relative', // Ensure the container allows child elements to be positioned correctly
+  position: 'relative',
+  width: '70%',
+  margin: '0 auto',
 });
 
-const MaskImage = styled('img')({
-  maxWidth: '100%', // Ensure the image scales with the container width
-  maxHeight: '100%', // Ensure the image scales with the container height
-  objectFit: 'contain', // Maintain aspect ratio of the image
-  width: '100%', // Make the image container fill the available width
-  height: 'auto', // Adjust height based on width to maintain aspect ratio
+const UploadedImage = styled('img')({
+  maxWidth: '100%',
+  maxHeight: '80%',
+  objectFit: 'contain',
 });
 
 const CenteredBox = styled(Box)({
   display: 'flex',
+  flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
 });
 
 const ButtonGroup = styled(Box)({
   marginTop: 16,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
 });
 
 const MeasurementCard = styled(Card)(({ theme }) => ({
@@ -81,7 +84,6 @@ const HeadCircumferenceCalculator = () => {
   const [originalImage, setOriginalImage] = useState(null);
   const [circumference, setCircumference] = useState(null);
   const [pixelValue, setPixelValue] = useState(null);
-  const [maskImage, setMaskImage] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
 
@@ -94,7 +96,6 @@ const HeadCircumferenceCalculator = () => {
       setOriginalImage(file);
       setCircumference(null);
       setPixelValue(null);
-      setMaskImage(null);
       setError(null);
     }
   };
@@ -102,29 +103,28 @@ const HeadCircumferenceCalculator = () => {
   const calculateCircumference = async () => {
     setIsProcessing(true);
     setError(null);
-  
+
     const formData = new FormData();
     formData.append('image', originalImage);
-  
+
     try {
       const response = await fetch('http://127.0.0.1:5000/api/calculate-circumference', {
         method: 'POST',
         body: formData,
       });
-  
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Server error: ${errorText}`);
       }
-  
+
       const data = await response.json();
-  
+
       if (data.circumference !== undefined) {
         // Convert circumference from pixels to millimeters
         const circumferenceInMm = data.circumference * pixelSizeInMm;
         setCircumference(circumferenceInMm);
         setPixelValue(data.pixelValue);
-        setMaskImage(`data:image/png;base64,${data.maskImage}`);
       } else {
         throw new Error('No circumference data received');
       }
@@ -140,7 +140,6 @@ const HeadCircumferenceCalculator = () => {
     setOriginalImage(null);
     setCircumference(null);
     setPixelValue(null);
-    setMaskImage(null);
     setError(null);
   };
 
@@ -153,108 +152,75 @@ const HeadCircumferenceCalculator = () => {
       </Breadcrumb>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12}>
           <FixedHeightCard>
             <FixedHeightCardContent>
               <Typography variant="h6" gutterBottom>
-                Original Image
+                Uploaded Ultrasound Image
               </Typography>
               <ImageContainer>
                 {originalImage ? (
-                  <img
+                  <UploadedImage
                     src={URL.createObjectURL(originalImage)}
-                    alt="Original ultrasound"
-                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                    alt="Uploaded ultrasound"
                   />
                 ) : (
                   <Typography color="textSecondary">No image uploaded</Typography>
                 )}
               </ImageContainer>
-              <Button
-                component="label"
-                variant="contained"
-                startIcon={<CloudUploadIcon />}
-                fullWidth
-              >
-                Upload Image
-                <VisuallyHiddenInput type="file" onChange={handleImageUpload} accept="image/*" />
-              </Button>
-            </FixedHeightCardContent>
-          </FixedHeightCard>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <FixedHeightCard>
-            <FixedHeightCardContent>
-              <Typography variant="h6" gutterBottom>
-                Mask Image
-              </Typography>
-              <ImageContainer>
-                {maskImage ? (
-                  <MaskImage
-                    src={maskImage}
-                    alt="Mask"
-                  />
-                ) : (
-                  <Typography color="textSecondary">
-                    {isProcessing ? 'Generating mask...' : 'No mask generated yet'}
-                  </Typography>
-                )}
-              </ImageContainer>
-            </FixedHeightCardContent>
-          </FixedHeightCard>
-        </Grid>
-
-        <Grid item xs={12}>
-          <MeasurementCard>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Head Circumference
-              </Typography>
               <CenteredBox>
                 {circumference !== null ? (
-                  <Typography variant="h4">
+                  <Typography variant="h4" gutterBottom>
                     Head Circumference: {circumference.toFixed(2)} mm
                   </Typography>
+                ) : isProcessing ? (
+                  <CircularProgress />
                 ) : (
-                  isProcessing ? (
-                    <CircularProgress />
-                  ) : (
-                    <Typography color="textSecondary">
-                      No circumference calculated yet
-                    </Typography>
-                  )
+                  <Typography color="textSecondary">
+                    No circumference calculated yet
+                  </Typography>
                 )}
+                <ButtonGroup>
+                  <Button
+                    component="label"
+                    variant="contained"
+                    startIcon={<CloudUploadIcon />}
+                    fullWidth
+                    sx={{ width: '250px' }} // Adjust button width
+                  >
+                    Upload Image
+                    <VisuallyHiddenInput type="file" onChange={handleImageUpload} accept="image/*" />
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={calculateCircumference}
+                    disabled={!originalImage || isProcessing}
+                    fullWidth
+                    sx={{ mt: 2, width: '250px' }} // Adjust button width
+                  >
+                    {isProcessing ? <CircularProgress size={24} /> : 'Calculate Circumference'}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    startIcon={<RestartAltIcon />}
+                    onClick={handleReset}
+                    disabled={!originalImage && circumference === null}
+                    fullWidth
+                    sx={{ mt: 2, width: '150px' }} // Adjust button width
+                  >
+                    Reset
+                  </Button>
+                </ButtonGroup>
               </CenteredBox>
-              <ButtonGroup>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={calculateCircumference}
-                  disabled={!originalImage || isProcessing}
-                  fullWidth
-                >
-                  {isProcessing ? <CircularProgress size={24} /> : 'Calculate Circumference'}
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  startIcon={<RestartAltIcon />}
-                  onClick={handleReset}
-                  disabled={!originalImage && circumference === null}
-                  fullWidth
-                  sx={{ mt: 2 }}
-                >
-                  Reset
-                </Button>
-              </ButtonGroup>
               {error && (
                 <Typography color="error" align="center" sx={{ mt: 2 }}>
                   {error}
                 </Typography>
               )}
-            </CardContent>
-          </MeasurementCard>
+            </FixedHeightCardContent>
+          </FixedHeightCard>
         </Grid>
       </Grid>
     </PageContainer>
